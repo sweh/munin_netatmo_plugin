@@ -1,0 +1,112 @@
+#!./bin/python
+# encoding=utf-8
+
+# Create a symlink with the following name-schema:
+# netatmo_$key
+# 
+# $key can be:
+#      Temperature
+#      Humidity
+#      CO2
+#      Pressure
+#      Noise
+#      Rain
+#      Wind
+#
+
+from __future__ import print_function, unicode_literals
+import lnetatmo
+import pickle
+import sys
+import os
+import time
+
+
+CACHE_PATH = '/tmp/netatmo.cache'
+
+def get_cached_weatherData():
+    if os.path.isfile(CACHE_PATH):
+        if time.time() - os.path.getmtime(CACHE_PATH) < 290:
+            with open(CACHE_PATH, 'rb') as file:
+                return pickle.load(file)
+        os.remove(CACHE_PATH)
+    authorization = lnetatmo.ClientAuth()
+    weatherData = lnetatmo.WeatherStationData(authorization)
+    with open(CACHE_PATH, 'wb') as file:
+        pickle.dump(weatherData, file)
+    return weatherData
+
+
+def fix_type(type_):
+    if type_ == 'Wind':
+        return 'WindStrength'
+    return type_
+
+
+def get_filtered_module_data(type_):
+    result = []
+    weatherData = get_cached_weatherData()
+    for station in weatherData.stations.values():
+        modules = [station] + station['modules']
+        for module in modules:
+            if type_ not in module['data_type']:
+                continue
+            result.append(
+                dict(station_name=station['station_name'],
+                     module_name=module['module_name'],
+                     label='{}{}'.format(station['station_name'], module['module_name']).replace(
+                         ' ', '').lower(),
+                     value=module['dashboard_data'][fix_type(type_)]))
+    return sorted(result, key=lambda k: k['label'])
+
+
+_, key = __file__.replace('___', ' ').split('_')
+label = key.lower()
+modules = get_filtered_module_data(key)
+
+
+if len(sys.argv) > 1:
+    print('graph_title {}'.format(key))
+    print('graph_order {}'.format(' '.join(m['label'] for m in modules)))
+    print('graph_category weather')
+    if key == 'Temperature':
+        print('graph_vlabel degrees')
+        warning = 30
+        critical = 35
+    elif key == 'Humidity':
+        print('graph_vlabel percent')
+        warning = None
+        critical = None
+    elif key == 'CO2':
+        print('graph_vlabel ppm')
+        warning = 1000
+        critical = 2000
+    elif key == 'Pressure':
+        print('graph_vlabel mbar')
+        warning = None
+        critical = None
+    elif key == 'Noise':
+        print('graph_vlabel dB')
+        warning = 65
+        critical = 86
+    elif key == 'Rain':
+        print('graph_vlabel mm')
+        warning = None
+        critical = None
+    elif key == 'Wind':
+        print('graph_vlabel kph')
+        warning = None
+        critical = None
+    for i, module in enumerate(modules):
+        label = module['label']
+        print('{}.label {} ({})'.format(label, module['module_name'], module['station_name']))
+        print('{}.type GAUGE'.format(label))
+        print('{}.colour COLOUR{}'.format(label, i))
+        if warning:
+            print('{}.type {}'.format(label, warning))
+        if critical:
+            print('{}.type {}'.format(label, critical))
+    sys.exit()
+
+for module in modules:
+    print('{}.value {}'.format(module['label'], module['value']))
