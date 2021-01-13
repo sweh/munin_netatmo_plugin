@@ -81,7 +81,7 @@ if len(sys.argv) > 1:
     print(f'graph_order {graph_order}')
     print('graph_category weather')
     if key == 'Temperature':
-        print('graph_vlabel degrees')
+        print('graph_vlabel degrees Celsius')
         warning = 30
         critical = 35
     elif key == 'Humidity':
@@ -116,9 +116,9 @@ if len(sys.argv) > 1:
         print(f'{label}.type GAUGE')
         print(f'{label}.colour COLOUR{i}')
         if warning:
-            print(f'{label}.type {warning}')
+            print(f'{label}.warning {warning}')
         if critical:
-            print(f'{label}.type {critical}')
+            print(f'{label}.critcal {critical}')
     sys.exit()
 
 for module in modules:
