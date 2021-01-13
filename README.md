@@ -3,12 +3,12 @@ Munin plugin that generates beautiful graphs from your netatmo weather stations
 
 ## Installation
 
-This plugin is written in Python >= 2.7. It uses the `lnetatmo` library to connect to the netatmo
+This plugin is written in Python 3.6+. It uses the `lnetatmo` library to connect to the netatmo
 api. It is recommended to use `virtualenv` instead of installing `lnetatmo` into your system pythons
 site packages.
 
     $ cd /path/to/munin_netatmo_plugin
-    $ virtualenv --no-site-packages .
+    $ python3 -m venv .
     $ bin/pip install lnetatmo
 
 Setup your environment from Netatmo Web interface and save your credentials to
