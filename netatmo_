@@ -1,4 +1,4 @@
-#!./bin/python3
+#!/etc/munin/plugins/bin/python3
 # encoding=utf-8
 
 # Create a symlink with the following name-schema:
@@ -19,8 +19,10 @@ import pickle
 import sys
 import os
 import time
+import json
 
 CACHE_PATH = '/tmp/netatmo.cache'
+AUTH = json.loads(open('/root/.netatmo.credentials').read())
 
 
 def get_cached_weatherData():
@@ -29,7 +31,12 @@ def get_cached_weatherData():
             with open(CACHE_PATH, 'rb') as file:
                 return pickle.load(file)
         os.remove(CACHE_PATH)
-    authorization = lnetatmo.ClientAuth()
+    authorization = lnetatmo.ClientAuth(
+        AUTH['CLIENT_ID'],
+        AUTH['CLIENT_SECRET'],
+        AUTH['USERNAME'],
+        AUTH['PASSWORD'],
+        scope="read_station")
     weatherData = lnetatmo.WeatherStationData(authorization)
     with open(CACHE_PATH, 'wb') as file:
         pickle.dump(weatherData, file)
