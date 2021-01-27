@@ -9,14 +9,14 @@ import os
 import time
 import json
 
-DATA_PATH = '/tmp/pvdata.txt'
+DATA_PATH = '/etc/munin/pvdata.txt'
 
 labels = dict(
     panelpower=('Erzeugung', 'COLOUR0'),
-    batterypower=('Batterie', 'COLOUR5'),
-    power_from_grid=('Netzbezug', 'COLOUR4'),
+    batterypower=('Batterie', 'COLOUR3'),
+    power_from_grid=('Netzbezug', 'COLOUR5'),
     power_to_grid=('Einspeisung', 'COLOUR1'),
-    consumption=('Verbrauch', 'COLOUR2'),
+    consumption=('Verbrauch', 'COLOUR7'),
 )
 
 
