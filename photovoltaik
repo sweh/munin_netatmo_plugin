@@ -1,0 +1,38 @@
+#!/etc/munin/plugins/bin/python3
+# encoding=utf-8
+
+#
+
+import pickle
+import sys
+import os
+import time
+import json
+
+DATA_PATH = '/tmp/pvdata.txt'
+
+labels = dict(
+    panelpower=('Erzeugung', 'COLOUR0'),
+    batterypower=('Batterie', 'COLOUR5'),
+    power_from_grid=('Netzbezug', 'COLOUR4'),
+    power_to_grid=('Einspeisung', 'COLOUR1'),
+    consumption=('Verbrauch', 'COLOUR2'),
+)
+
+
+if len(sys.argv) > 1:
+    print(f'graph_title photovoltaik')
+    print('graph_category photovoltaik')
+    print('graph_vlabel wh')
+    for key, data in labels.items():
+        label, colour = data
+        print(f'{key}.label {label}')
+        print(f'{key}.type GAUGE')
+        print(f'{key}.colour {colour}')
+    sys.exit()
+
+with open(DATA_PATH, 'rb') as f:
+    data = json.loads(f.readline().decode())
+
+for key, value in data.items():
+    print(f'{key}.value {value}')
